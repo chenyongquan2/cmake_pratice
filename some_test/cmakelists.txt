@@ -1,0 +1,50 @@
+# mkdir some_test/build
+# cd make_some_testlibrary/build
+# cmake .. && cmake --build . && ./Debug/app.exe
+
+cmake_minimum_required(VERSION 3.0.0)
+PROJECT(CAlC)
+
+set(CMAKE_CXX_STANDARD 11)
+
+#做些测试
+
+set(TEMP a b c)
+#会直接覆盖上面的变量
+set(TEMP e f)
+message(STATUS ${TEMP})
+
+message("==================sep=================")
+set(temp1 a b c)
+set(temp2 a;b;c)
+message("temp1=${temp1}")
+message("temp2=${temp2}")
+
+message("==================sep=================")
+
+file(GLOB SRC_1 ${PROJECT_SOURCE_DIR}/src/*.cpp)
+file(GLOB SRC_2 ${PROJECT_SOURCE_DIR}/src2/*.cpp)
+
+#下面的输出结果:
+# C:/workspace/cmake_pratice/some_test/src/a.cppC:/workspace/cmake_pratice/some_test/src/b.cppC:/workspace/cmake_pratice/some_test/src/a.cppC:/workspace/cmake_pratice/some_test/src/b.cppC:/workspace/cmake_pratice/some_test/src2/c.cppC:/workspace/cmake_pratice/some_test/src2/d.cpp
+#list(APPEND SRC_1 ${SRC_1} ${SRC_2})
+
+#下面的输出结果:
+# C:/workspace/cmake_pratice/some_test/src/a.cppC:/workspace/cmake_pratice/some_test/src/b.cppC:/workspace/cmake_pratice/some_test/src2/c.cppC:/workspace/cmake_pratice/some_test/src2/d.cpp
+list(APPEND SRC_1 ${SRC_2})
+
+message("before remove some files, src=${SRC_1}")
+
+message("==================sep=================")
+
+list(REMOVE_ITEM SRC_1 ${PROJECT_SOURCE_DIR}/src2/d.cpp)
+message("after remove some files, src=${SRC_1}")
+
+message("==================sep=================")
+
+
+
+
+    
+
+
