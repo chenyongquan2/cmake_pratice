@@ -35,8 +35,35 @@ elseif(LIB_MODE STREQUAL shared)
     add_library(calc SHARED ${SRC_LIST})
 else()
     message(STATUS "Generating executor...")
-    set(SRC_LIST ${SRC_LIST};main.cpp)
+    set(SRC_LIST main.cpp)
     set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build)
-    add_executable(app ${SRC_LIST})
+
+    #链接静态库还是动态库
+    if(LINK_LIB_MODE STREQUAL static)
+        message(STATUS "Generating executor with link static lib...")
+        #指定静态库的所在路径
+        #若没有下面这行，则会报错:LINK : fatal error LNK1104: 无法打开文件“calc.lib” [C:\workspace\cmake_pratice\make_library\build\app.vcxproj]
+        link_directories(${PROJECT_SOURCE_DIR}/lib)
+
+        #链接静态库
+        #若没有下面这行，则会报错:main.obj : error LNK2019: 无法解析的外部符号 "int __cdecl add(int,int)" (?add@@YAHHH@Z)，函数 main 中引用了该符号 [C:\workspace\cmake
+        #_pratice\make_library\build\app.vcxproj]
+        link_libraries(calc)
+        add_executable(app ${SRC_LIST})
+    else()
+        message(STATUS "Generating executor with link shared lib...")
+        #指定动态库的所在路径
+        #若没有下面这行, 则会报错:LINK : fatal error LNK1104: 无法打开文件“calc.lib” [C:\workspace\cmake_pratice\make_library\build\app.vcxproj]
+        link_directories(${PROJECT_SOURCE_DIR}/lib)
+
+        add_executable(app ${SRC_LIST})
+
+        # 指定要链接的动态库
+        # 若没有下面这行，则会报错: main.obj : error LNK2019: 无法解析的外部符号 "int __cdecl add(int,int)" (?add@@YAHHH@Z)，函数 main 中引用了该符号 [C:\workspace\cmake
+        #_pratice\make_library\build\app.vcxproj]
+        target_link_libraries(app calc)
+    endif()
+
+    
 endif()
 
