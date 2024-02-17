@@ -3,3 +3,6 @@
 /make_library/lib
 /some_test/build/
 /some_test/lib
+/inside_template/build/
+/inside_template/lib
+/inside_template/bin
