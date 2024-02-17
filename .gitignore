@@ -1,6 +1,6 @@
 /first_template/build/
 /make_library/build/
-/make_library/lib
+/make_library/lib/
 /some_test/build/
 /some_test/lib
 /inside_template/build/

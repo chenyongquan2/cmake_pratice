@@ -1,9 +1,9 @@
 # mkdir make_library/build
 # cd make_library/build
-# cmake .. && cmake --build . && ./Debug/app.exe
+# cmake .. -DLIB_MODE=exec && cmake --build . && ./Debug/app.exe
 # 如果要指定生成静态库/动态库
-# cmake .. -DLIB_MODE=static && cmake --build .
-# cmake .. -DLIB_MODE=shared && cmake --build .
+# cmake .. -DLIB_MODE=static && cmake --build . && ./Debug/app.exe
+# cmake .. -DLIB_MODE=shared && cmake --build . && ./Debug/app.exe
 
 cmake_minimum_required(VERSION 3.0.0)
 PROJECT(CAlC)
@@ -32,38 +32,47 @@ elseif(LIB_MODE STREQUAL shared)
     message(STATUS "Generating LIB_SHARED...")
     set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
     #set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
-    add_library(calc SHARED ${SRC_LIST})
-else()
-    message(STATUS "Generating executor...")
-    set(SRC_LIST main.cpp)
-    set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build)
 
-    #链接静态库还是动态库
-    if(LINK_LIB_MODE STREQUAL static)
-        message(STATUS "Generating executor with link static lib...")
-        #指定静态库的所在路径
-        #若没有下面这行，则会报错:LINK : fatal error LNK1104: 无法打开文件“calc.lib” [C:\workspace\cmake_pratice\make_library\build\app.vcxproj]
-        link_directories(${PROJECT_SOURCE_DIR}/lib)
-
-        #链接静态库
-        #若没有下面这行，则会报错:main.obj : error LNK2019: 无法解析的外部符号 "int __cdecl add(int,int)" (?add@@YAHHH@Z)，函数 main 中引用了该符号 [C:\workspace\cmake
-        #_pratice\make_library\build\app.vcxproj]
-        link_libraries(calc)
-        add_executable(app ${SRC_LIST})
-    else()
-        message(STATUS "Generating executor with link shared lib...")
-        #指定动态库的所在路径
-        #若没有下面这行, 则会报错:LINK : fatal error LNK1104: 无法打开文件“calc.lib” [C:\workspace\cmake_pratice\make_library\build\app.vcxproj]
-        link_directories(${PROJECT_SOURCE_DIR}/lib)
-
-        add_executable(app ${SRC_LIST})
-
-        # 指定要链接的动态库
-        # 若没有下面这行，则会报错: main.obj : error LNK2019: 无法解析的外部符号 "int __cdecl add(int,int)" (?add@@YAHHH@Z)，函数 main 中引用了该符号 [C:\workspace\cmake
-        #_pratice\make_library\build\app.vcxproj]
-        target_link_libraries(app calc)
+    # 设置导入库文件的生成选项.得放在add_library生成动态库之前的位置。
+    if (WIN32)
+        #通过设置 CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 变量为 ON，CMake 将会自动生成导出符号文件（.lib）来支持动态库的导入和链接。
+        set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
     endif()
+
+    add_library(calc SHARED ${SRC_LIST})
 
     
 endif()
 
+#利用上面生成静态库/动态库 来链接生成 exe
+message(STATUS "Generating executor...")
+set(SRC_LIST main.cpp)
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build)
+
+#链接静态库还是动态库
+if(LINK_LIB_MODE STREQUAL static)
+    message(STATUS "Generating executor with link static lib...")
+    #指定静态库的所在路径
+    #若没有下面这行，则会报错:LINK : fatal error LNK1104: 无法打开文件“calc.lib” [C:\workspace\cmake_pratice\make_library\build\app.vcxproj]
+    link_directories(${PROJECT_SOURCE_DIR}/lib)
+
+    #链接静态库
+    #若没有下面这行，则会报错:main.obj : error LNK2019: 无法解析的外部符号 "int __cdecl add(int,int)" (?add@@YAHHH@Z)，函数 main 中引用了该符号 [C:\workspace\cmake
+    #_pratice\make_library\build\app.vcxproj]
+    link_libraries(calc)
+    add_executable(app ${SRC_LIST})
+else()
+    message(STATUS "Generating executor with link shared lib...")
+    #指定动态库的所在路径
+    #若没有下面这行, 则会报错:LINK : fatal error LNK1104: 无法打开文件“calc.lib” [C:\workspace\cmake_pratice\make_library\build\app.vcxproj]
+    link_directories(${PROJECT_SOURCE_DIR}/lib)
+
+    add_executable(app ${SRC_LIST})
+
+    # 指定要链接的动态库
+    # 若没有下面这行，则会报错: main.obj : error LNK2019: 无法解析的外部符号 "int __cdecl add(int,int)" (?add@@YAHHH@Z)，函数 main 中引用了该符号 [C:\workspace\cmake
+    #_pratice\make_library\build\app.vcxproj]
+    target_link_libraries(app calc)
+endif()
+
+    
